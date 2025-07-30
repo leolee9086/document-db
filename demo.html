@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocumentDB HTML保存演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .data-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input, button {
+            margin: 5px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .data-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .key {
+            font-weight: bold;
+            color: #495057;
+        }
+        .value {
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DocumentDB HTML保存演示</h1>
+        
+        <div class="controls">
+            <h3>数据操作</h3>
+            <input type="text" id="keyInput" placeholder="键名" />
+            <input type="text" id="valueInput" placeholder="值" />
+            <button onclick="addData()">添加数据</button>
+            <button onclick="clearData()">清空数据</button>
+        </div>
+
+        <div class="controls">
+            <h3>HTML保存</h3>
+            <button onclick="saveAsHTML()">保存为HTML</button>    
+            <button onclick="saveAsCleanHTML()">保存为干净HTML</button>
+            <button onclick="saveAsStyledHTML()">保存为带样式HTML</button>
+        </div>
+        
+        <div class="controls">
+            <h3>DocumentDB类演示</h3>
+            <button onclick="testDocumentDBClass()">测试DocumentDB类</button>
+            <button onclick="testClassTransactions()">测试类事务</button>
+            <button onclick="testClassStaticMethods()">测试静态方法</button>
+        </div>
+
+        <div class="data-section">
+            <h3>当前数据</h3>
+            <div id="dataDisplay"></div>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script type="module">
+        import * as DocumentDB from './dist/document-db.es.js';
+        
+        // 创建DocumentDB状态
+        const state = DocumentDB.createDocumentDBState(document, 'demo-db');
+        
+        // 设置一些初始数据
+        DocumentDB.setData(document, 'welcome', '欢迎使用DocumentDB!');
+        DocumentDB.setData(document, 'timestamp', new Date().toISOString());
+        DocumentDB.setData(document, 'user', { name: '演示用户', role: 'admin' });
+        
+        // 暴露到全局以便按钮使用
+        window.DocumentDB = DocumentDB;
+        window.state = state;
+        
+        // 更新显示
+        updateDataDisplay();
+        
+        function updateDataDisplay() {
+            const display = document.getElementById('dataDisplay');
+            const keys = DocumentDB.listDataKeys(document);
+            
+            display.innerHTML = keys.map(key => {
+                const value = DocumentDB.getData(document, key);
+                return `
+                    <div class="data-item">
+                        <span class="key">${key}:</span>
+                        <span class="value">${JSON.stringify(value)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        window.addData = function() {
+            const key = document.getElementById('keyInput').value;
+            const value = document.getElementById('valueInput').value;
+            
+            if (key && value) {
+                DocumentDB.setData(document, key, value);
+                updateDataDisplay();
+                showStatus('数据添加成功', 'success');
+                
+                // 清空输入框
+                document.getElementById('keyInput').value = '';
+                document.getElementById('valueInput').value = '';
+            } else {
+                showStatus('请输入键和值', 'error');
+            }
+        };
+        
+        window.clearData = function() {
+            DocumentDB.clearData(document);
+            updateDataDisplay();
+            showStatus('数据已清空', 'success');
+        };
+        
+        window.saveAsHTML = async function() {
+            try {
+                const success = await DocumentDB.saveAsHTML(document, {
+                    filename: `document-db-${Date.now()}.html`,
+                    includeDBRoot: true
+                });
+                
+                if (success) {
+                    showStatus('HTML文件保存成功！', 'success');
+                } else {
+                    showStatus('HTML文件保存失败', 'error');
+                }
+            } catch (error) {
+                showStatus(`保存失败: ${error.message}`, 'error');
+            }
+        };
+        
+        window.saveAsCleanHTML = async function() {
+            try {
+                const success = await DocumentDB.saveAsHTML(document, {
+                    filename: `document-db-clean-${Date.now()}.html`,
+                    includeDBRoot: false
+                });
+                
+                if (success) {
+                    showStatus('干净HTML文件保存成功！', 'success');
+                } else {
+                    showStatus('干净HTML文件保存失败', 'error');
+                }
+            } catch (error) {
+                showStatus(`保存失败: ${error.message}`, 'error');
+            }
+        };
+        
+        window.saveAsStyledHTML = async function() {
+            try {
+                const success = await DocumentDB.saveAsHTML(document, {
+                    filename: `document-db-styled-${Date.now()}.html`,
+                    includeDBRoot: true,
+                    customStyles: `
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: #333;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: white;
+                            padding: 30px;
+                            border-radius: 15px;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                        }
+                        h1 {
+                            color: #667eea;
+                            text-align: center;
+                            margin-bottom: 30px;
+                        }
+                        .data-item {
+                            background: #f8f9fa;
+                            padding: 15px;
+                            margin: 10px 0;
+                            border-radius: 8px;
+                            border-left: 4px solid #667eea;
+                        }
+                        .key {
+                            color: #667eea;
+                            font-weight: bold;
+                        }
+                    `
+                });
+                
+                if (success) {
+                    showStatus('带样式HTML文件保存成功！', 'success');
+                } else {
+                    showStatus('带样式HTML文件保存失败', 'error');
+                }
+            } catch (error) {
+                showStatus(`保存失败: ${error.message}`, 'error');
+            }
+        };
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+            
+            // 3秒后自动清除
+            setTimeout(() => {
+                status.innerHTML = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html> 

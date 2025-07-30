@@ -1,0 +1,39 @@
+{
+  "name": "document-db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/document-db.umd.js",
+  "module": "dist/document-db.es.js",
+  "unpkg": "dist/document-db.umd.js",
+  "types": "dist/types/document-db.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/document-db.d.ts",
+      "import": "./dist/document-db.es.js",
+      "require": "./dist/document-db.umd.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "test": "playwright test",
+    "build": "vite build",
+    "build:types": "tsc --emitDeclarationOnly",
+    "playwright:init": "playwright init"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.13.1",
+  "devDependencies": {
+    "@playwright/test": "^1.54.1",
+    "@vitest/coverage-v8": "^3.2.4",
+    "playwright": "^1.54.1",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.6",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4"
+  }
+}
