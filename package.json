@@ -1,5 +1,5 @@
 {
-  "name": "document-db",
+  "name": "@leolee9086/document-db",
   "version": "1.0.0",
   "description": "",
   "main": "dist/document-db.umd.js",
