@@ -5,7 +5,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
 export default defineConfig({
   plugins: [vue(), viteSingleFile()],
   build: {
-    outDir: '../../dist', // 将构建输出到项目根目录的 dist 文件夹
+    outDir: '../../docs', // 将构建输出到项目根目录的 docs 文件夹，以便GitHub Pages部署
     rollupOptions: {
       output: {
         // 生成单文件
