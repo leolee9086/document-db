@@ -2,7 +2,7 @@
 
 基于 DOM 的轻量级文档数据库，专为构建**单文件自包含应用**而设计。
 
-![License](https://img.shields.io/badge/license-ISC-blue.svg)
+![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)
 ![TypeScript](https://img.shields.io/badge/language-TypeScript-blue.svg)
 
 ## 简介
